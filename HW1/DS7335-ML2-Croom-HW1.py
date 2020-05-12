@@ -741,6 +741,65 @@ print(cnt2.values())
 
 # BONUS: from itertools import*
 #****************************************************************************
+# Itertools provides high speed tools for efficient looping. 
+from itertools import*
+
+# list the methods available in the package
+dir(itertools)
+
+# accumulate() - The accumulate() method is an iterator that returns sums or accumulated
+# results of binary operators. It takes an iterable value as a required parameter, and an optional
+# function specification to specific how to accumulate the sum. The default is to add, but other 
+# operators or lambda functions may be provided. 
+# Using the example below we'll define a dataset and return both an added list and a max value list
+data = [5,6,7,20,8,9]
+#add the list values, result is [5, 11, 18, 38, 46, 55]
+print(list(accumulate(data)))
+
+# find the max in the list values, result in [5, 6, 7, 20, 20, 20]
+print(list(accumulate(data, max)))
+
+# chain() - The chain() method returns from the first iterable list until all values are exhaused and then
+# proceeds to the next iterable until all the iterables are exhausted. The result is a single sequence
+# of all the values in the iterable
+# Example below, results in ['S', 'M', 'U', 'M', 'S', 'D', 'S', 'R', 'o', 'c', 'k', 's']
+print(list(chain("SMU","MSDS","Rocks")))
+
+# combinations() - The combinations() method will return subsequences based on the parameter value r
+# specified from the iterable. Combinations are emitted in lexicographical order and thus sorted lists
+# will return sorted. If the input values are unique there will be no repeat combinations
+# Example below, results in [('A', 'B'), ('A', 'E'), ('A', 'F'), ('B', 'E'), ('B', 'F'), ('E', 'F')]
+print(list(combinations("ABEF",2)))
+
+# combinations_with_replacement() - The combinations_with_replacement() method will return subsequences based on the parameter value r
+# specified from the iterable. Combinations are emitted in lexicographical order and thus sorted lists
+# will return sorted. This method allows for repeat combinations
+# Example below, results in [('A', 'A'), ('A', 'B'), ('A', 'E'), ('A', 'F'), ('B', 'B'), ('B', 'E'), ('B', 'F'), ('E', 'E'), ('E', 'F'), ('F', 'F')]
+print(list(combinations_with_replacement("ABEF",2)))
+
+# compress() - The compress() method filters elements from the data parameter returning only those
+# values that have a corresponding element in the selectors parameter that evaluates to true. The
+# process stops when either the data or the selectors iterable has been exhausted
+# Example below, results in ['H', 'E', 'L', 'L', 'O']
+print(list(compress("HAEOLELAO",[1,0,1,0,1,0,1,0,1])))
+
+# count() - The count() method returns evenly spaced values beginning with the start parameter and
+# increasing based on the step parameter specified
+# Example below, results equivalent to 1 2 3 4 5
+count(5,1) 
+
+# cycle() - The cycle() method returns elements from the iterable, saving a copy of each. Once the 
+# initial iterable is exhausted, the method returns elements from the saved copy, repeating indefinitely
+# Example below, results equivalent to 'B C D B C D B C D...'
+cycle('BCD')
+
+# permutations() - The permutations() method returns the permutations based on the length specified
+# to the optional parameter r. If r is not specified the method returns all possible full-length permutations
+# Example below, results in [('B', 'A'), ('B', 'A'), ('B', 'D'), ('B', 'F'), ('A', 'B'), ('A', 'A'),
+#  ('A', 'D'), ('A', 'F'), ('A', 'B'), ('A', 'A'), ('A', 'D'), ('A', 'F'), ('D', 'B'), ('D', 'A'), 
+# ('D', 'A'), ('D', 'F'), ('F', 'B'), ('F', 'A'), ('F', 'A'), ('F', 'D')]
+print(list(permutations("BAADF",2)))
+
 
 # Part 2 - Question 1
 # ***************************************************************************
@@ -818,8 +877,13 @@ print("Elements with W: ", i)
 # 3. Make histogram/bar plot of colors
 import matplotlib.pyplot as plt
 
-# plot all unique values based on the counter mappings
-plt.bar(Counter(flower_orders).keys(), Counter(flower_orders).values()) 
+# plot top 10 unique order values based on the counter mappings
+top_ten = Counter(flower_orders).most_common(10)
+plt.bar(*zip(*top_ten)) 
+plt.title("Top Ten Ordering Combinations")
+plt.xlabel("Ordering Combination")
+plt.ylabel("Count")
+plt.show()
 
 # now do a histogram/bar plot of individual colors
 # define a dictionary to hold the results
@@ -838,6 +902,10 @@ for item in Counter(flower_orders).elements():
         
 #plot the individual colors
 plt.bar(colordict.keys(), colordict.values())
+plt.title("Individual Colors Counts")
+plt.xlabel("Color Value")
+plt.ylabel("Count")
+plt.show()
 
 # 4. Rank the tuples of color pairs regardless of how many colors in order.
 # Reading this question it looks as simple as providing the unique color sets by the number ot times 
@@ -902,6 +970,55 @@ print(colorDict)
 
 # 7. Make a graph showing the probability of having an edge between two colors based on how
 #    often they co-occur. (a numpy square matrix)
+import numpy as np
+import string
+
+#build out the mapping array and probability array for the probability calculations
+arraySize = 0
+arraySize = len(colorDict)
+mapArray = np.zeros((arraySize,arraySize))
+probArray = np.zeros((arraySize,arraySize))
+
+
+for item in Counter(flower_orders).elements():
+    colors = item.replace("/","")
+    
+    for i in range(len(colors)-1):
+        x = list(colorDict.keys()).index(colors[i])
+        y = list(colorDict.keys()).index(colors[i+1])
+        mapArray[x,y] = mapArray[x,y] + 1
+        
+# initialize the counter array
+counter = mapArray.sum(axis=1)
+
+#cycle through the main array and calculate our probabilities
+i = 0
+
+for row in mapArray:
+    j = 0
+    
+    for cell in row:
+        #check to make sure we don't try to divide by zero
+        if counter[i] != 0:
+            probVal = cell / counter[i]
+        
+        #check to make sure we have a real value
+        if np.isnan(probVal):
+            probVal = 0
+            
+        probArray[i,j] = probVal
+        j +=1
+    
+    i += 1    
+    
+#Plot the data
+for line in mapArray:
+    plt.plot(line)
+plt.xlabel("Color")
+plt.ylabel("Probability")
+plt.title("Transition Probabilities from color to color")
+plt.show()  
+    
 
 # 8. Make 10 business questions related to the questions we asked above.
 # - What are the total number of orders placed? A: 183
@@ -912,7 +1029,9 @@ print(colorDict)
 # - What color pairing occur most frequently? A: White/Red at 107
 # - What color pairing had the lowest frequency of occurrence? A: Violet/Violet at 1
 # - How many individual colors of flowers should be stocked? A: 10
-# - 
+# - What is the least common indivdual color? A: P (Purple)
+# - What are the top ten ordering combinations? A: [('W/R/B', 30), ('W/R', 16), ('R/V/Y', 10), ('W/R/V', 10), 
+# ('W/N/R/V', 8), ('W/R/B/Y', 6), ('B/Y', 5), ('R/B/Y', 5), ('W/N/R/B/V/Y', 5), ('W/G', 4)]
 
 # Part 2 - Question 2
 # ***************************************************************************
@@ -978,9 +1097,67 @@ newStr = noSpaceStr.lower()
 newStr = "".join(let for let in newStr if let.isalpha())
 
 import numpy as np
+import string
+# create a 26 x 26 numpy array of zeros
+array1 = np.zeros((26,26))
 
+# initialize the array looking at character by character mappings
+for i in range(len(newStr)-1):
+    #get the position in the alphabet of the current character and the next character
+    #then plug into the array
+    x = string.ascii_lowercase.index(newStr[i])
+    y = string.ascii_lowercase.index(newStr[i+1])
+    array1[x,y] = array1[x,y] + 1
 
+#initialize the counter array
+counter = array1.sum(axis=1)
 
+ # create a 26 x 26 numpy array of zeros
+probArray = np.zeros((26,26)) 
 
+#cycle through the main array and calculate our probabilities
+i = 0
 
+for row in array1:
+    j = 0
+    
+    for cell in row:
+        #check to make sure we don't try to divide by zero
+        if counter[i] != 0:
+            probVal = cell / counter[i]
+        
+        #check to make sure we have a real value
+        if np.isnan(probVal):
+            probVal = 0
+            
+        probArray[i,j] = probVal
+        j +=1
+    
+    i += 1
 
+# 5. Make a 26x26 graph of 4. in numpy
+# As part of the calculations for number 4 above the numpy array probArray was created
+# We'll print the shape (26x26) to show that it meets the requirements. 
+print(probArray.shape)
+
+# optional
+# 6. plot graph of transition probabilities from letter to letter
+for line in probArray:
+    plt.plot(line)
+plt.xlabel("Alphabetical Letter (0=a...25=z)")
+plt.ylabel("Probability")
+plt.title("Transition Probabilities from letter to letter")
+plt.show()
+
+# 7. Flatten a nested list
+# build out a nested list
+nestedList = ['aa', ['c',['fff','ggg'], 'e', 'h'],'vv','nn']
+
+# native python (no additional libraries)
+flattened_list = [y for x in nestedList for y in x]
+print(flattened_list)
+
+# using itertools
+import itertools
+flattened_list2 = list(itertools.chain(*nestedList))
+print(flattened_list2)
