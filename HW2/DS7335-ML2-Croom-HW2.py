@@ -203,7 +203,7 @@ def groupClassifiers(results_dict):
 
     return(clfsAccuracyDict)
 
-# METHOD NAME: run_mod
+# METHOD NAME: hyper_search
 # METHOD DESC: This method processes dictionaries of clfs and hyperparamters against a data set
 #              The method will then determine the best clf/hyperparameter combination and output
 #              matplot lib plots to show confirmation.
@@ -216,7 +216,7 @@ def groupClassifiers(results_dict):
 #   - no returned values
 #   - will output into running directory matplotlib plots of best clf/hyper permutations
 #
-def run_mod(model_dict, param_dict, data, filename=''):
+def hyper_search(model_dict, param_dict, data, filename=''):
     # define empty dictionaries to start
     np_results = {}
     accuracyDics = {}
@@ -262,6 +262,20 @@ cancer_data, cancer_target = datasets.load_breast_cancer(return_X_y=True)
 data = (cancer_data, cancer_target,n_folds)
 
 #*****************************************************************************************
+# START - execute the final hyper_search code to take the parameters and data and output the 
+#         histograms
+#****************************************************************************************
+hyper_search(model_dict, model_params_dict, data, "BCroom_clf_Histograms_")
+
+#*****************************************************************************************
+# END - full run of modified code using hyper parameters
+#****************************************************************************************
+
+# NOTE: The sections of commented code below are my sanity checks that the final function
+#       was able to be built the way I wanted it to be. I'm going to leave these sections
+#       in here just for purposes to show my though process.     
+
+#*****************************************************************************************
 # START - Initial run of the methods above with single clf and no hyper parameters to verify logic
 #*****************************************************************************************
 # results = run(RandomForestClassifier, data, clf_hyper={})
@@ -293,12 +307,4 @@ data = (cancer_data, cancer_target,n_folds)
 #*****************************************************************************************
 # END - run code with multiple classifiers, still no hyper parameters
 #*****************************************************************************************
- 
 
-#*****************************************************************************************
-# START - full run of modified code using hyper parameters
-#*****************************************************************************************
-run_mod(model_dict, model_params_dict, data, "BCroom_T2_clf_Histograms_")
-#*****************************************************************************************
-# START - full run of modified code using hyper parameters
-#*****************************************************************************************
